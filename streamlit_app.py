@@ -1,5 +1,7 @@
 # app.py
 import streamlit as st
+import pandas as pd
+import altair as alt
 from tokenomics import Tokenomics
 
 st.set_page_config(page_title="XToken Egg Simulation", layout="wide")
@@ -44,17 +46,49 @@ if st.button("Speed Exit"):
 
 # Eggs Section
 st.subheader("🥚 Eggs Inventory")
+
+hatched = sum(1 for egg in sim.eggs if egg['hatched'])
+rotted = sum(1 for egg in sim.eggs if egg['rotted'])
+unhatched = len(sim.eggs) - hatched - rotted
+
+st.markdown(f"- 🐣 Hatched Eggs: **{hatched}**")
+st.markdown(f"- 💀 Rotted Eggs: **{rotted}**")
+st.markdown(f"- ⏳ Unhatched Eggs: **{unhatched}**")
+
+# Chart Visualization
+egg_data = pd.DataFrame({
+    "Status": ["Hatched", "Rotted", "Unhatched"],
+    "Count": [hatched, rotted, unhatched]
+})
+
+egg_chart = alt.Chart(egg_data).mark_bar().encode(
+    x=alt.X("Status", sort=["Hatched", "Rotted", "Unhatched"]),
+    y="Count",
+    color="Status"
+).properties(
+    title="Egg Status Breakdown",
+    width=500,
+    height=300
+)
+
+st.altair_chart(egg_chart, use_container_width=True)
+
+st.markdown("#### Detailed Egg Status")
 for egg in sim.eggs:
-    st.write(egg)
+    status = "✅ Hatched" if egg['hatched'] else "💀 Rotted" if egg['rotted'] else f"⏳ Rotting: {egg['rot_percent']*100:.1f}%"
+    st.write(f"{egg['color']} Egg (Born Week {egg['born']}) — {status}")
 
 # Hatching
 st.subheader("🐣 Hatch Eggs")
 available_eggs = [e for e in sim.eggs if not e['hatched'] and not e['rotted']]
-selected_egg = st.selectbox("Choose Egg to Hatch", available_eggs, format_func=lambda e: f"{e['color']} Egg (Week {e['born']})")
-with st.expander("Stake to Hatch"):
-    use_xtoken = st.checkbox("Use XToken (1 required)", value=True)
-    if st.button("Stake to Hatch Egg"):
-        sim.stake_to_hatch(selected_egg, use_xtoken)
+if available_eggs:
+    selected_egg = st.selectbox("Choose Egg to Hatch", available_eggs, format_func=lambda e: f"{e['color']} Egg (Week {e['born']})")
+    with st.expander("Stake to Hatch"):
+        use_xtoken = st.checkbox("Use XToken (1 required)", value=True)
+        if st.button("Stake to Hatch Egg"):
+            sim.stake_to_hatch(selected_egg, use_xtoken)
+else:
+    st.write("No hatchable eggs available.")
 
 # Show Hatcher status
 st.subheader("🧪 Hatcher")
