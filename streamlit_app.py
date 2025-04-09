@@ -8,13 +8,17 @@ st.title("📈 Token Emission Schedule Simulator")
 # --- Sidebar Inputs ---
 st.sidebar.header("🔧 Simulation Settings")
 
-initial_tokens = st.sidebar.number_input("Initial Token Supply", value=16_000_000)
-initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.45, step=0.01)
-weekly_fees = st.sidebar.number_input("Weekly Fee Revenue ($)", value=20_000)
-base_emission = st.sidebar.number_input("Initial Weekly Emission", value=300_000)
-decay_rate = st.sidebar.number_input("Decay Rate per Week (e.g., 0.98)", value=0.98)
-weeks = st.sidebar.slider("Number of Weeks to Simulate", min_value=10, max_value=520, value=104)
-my_tokens = st.sidebar.number_input("Your Token Holdings", value=10_000)
+initial_tokens = st.sidebar.number_input("Initial Token Supply", value=16000000, format="%d")
+initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.45, step=0.01, format="%.2f")
+weekly_fees = st.sidebar.number_input("Weekly Fee Revenue ($)", value=20000, step=1000, format="%d")
+base_emission = st.sidebar.number_input("Initial Weekly Emission", value=300000, step=10000, format="%d")
+
+# New: input decay as a percentage (e.g. 2%)
+decay_percent = st.sidebar.number_input("Emission Decay per Week (%)", value=2.0, min_value=0.0, max_value=100.0, step=0.1, format="%.1f")
+decay_rate = 1 - decay_percent / 100  # Convert percent to multiplier
+
+weeks = st.sidebar.slider("Number of Weeks to Simulate", min_value=10, max_value=520, value=104, step=1)
+my_tokens = st.sidebar.number_input("Your Token Holdings", value=10000, format="%d")
 
 # --- Simulation ---
 weeks_list = np.arange(weeks)
@@ -55,7 +59,7 @@ with col2:
     st.subheader("💰 Valuation Over Time")
     st.line_chart(df.set_index("Week")[["Valuation ($)"]])
 
-    st.subheader("📦 Cumulative Protocol Fees Collected")
+    st.subheader("📦 Cumulative Protocol Fees")
     st.line_chart(df.set_index("Week")[["Cumulative Fees ($)"]])
 
     st.subheader("💼 Your Cumulative Fee Earnings")
@@ -64,9 +68,9 @@ with col2:
 # --- Optional Data Table ---
 with st.expander("📋 See Raw Data Table"):
     st.dataframe(df.style.format({
-        "Weekly Emission": "{:,.0f}",
-        "Total Supply": "{:,.0f}",
-        "Valuation ($)": "${:,.0f}",
-        "Your Fee Share ($)": "${:,.2f}",
-        "Your Cumulative Fees ($)": "${:,.2f}"
+        "Weekly Emission": "{:.0f}",
+        "Total Supply": "{:.0f}",
+        "Valuation ($)": "${:.0f}",
+        "Your Fee Share ($)": "${:.2f}",
+        "Your Cumulative Fees ($)": "${:.2f}"
     }))
