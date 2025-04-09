@@ -33,6 +33,10 @@ your_weekly_fee_share = your_share_pct * weekly_fees
 your_cumulative_fees = np.cumsum(your_weekly_fee_share)
 total_cumulative_fees = np.cumsum([weekly_fees] * weeks)
 
+# Calculate the initial investment and the relative earnings
+initial_investment = my_tokens * initial_price
+relative_cumulative_earnings = (your_cumulative_fees / initial_investment) * 100
+
 # --- DataFrame ---
 df = pd.DataFrame({
     "Week": weeks_list,
@@ -41,7 +45,8 @@ df = pd.DataFrame({
     "Valuation ($)": valuations,
     "Cumulative Fees ($)": total_cumulative_fees,
     "Your Fee Share ($)": your_weekly_fee_share,
-    "Your Cumulative Fees ($)": your_cumulative_fees
+    "Your Cumulative Fees ($)": your_cumulative_fees,
+    "Relative Cumulative Earnings (%)": relative_cumulative_earnings
 })
 
 # --- Layout Columns ---
@@ -57,15 +62,18 @@ with col1:
     st.subheader("💸 Your Weekly Fee Earnings")
     st.line_chart(df.set_index("Week")[["Your Fee Share ($)"]])
 
+    st.subheader("📦 Cumulative Protocol Fees")
+    st.line_chart(df.set_index("Week")[["Cumulative Fees ($)"]])
+
 with col2:
     st.subheader("💰 Valuation Over Time")
     st.line_chart(df.set_index("Week")[["Valuation ($)"]])
 
-    st.subheader("📦 Cumulative Protocol Fees")
-    st.line_chart(df.set_index("Week")[["Cumulative Fees ($)"]])
-
     st.subheader("💼 Your Cumulative Fee Earnings")
     st.line_chart(df.set_index("Week")[["Your Cumulative Fees ($)"]])
+
+    st.subheader("📈 Relative Cumulative Fee Earnings (%)")
+    st.line_chart(df.set_index("Week")[["Relative Cumulative Earnings (%)"]])
 
 # --- Optional Data Table ---
 with st.expander("📋 See Raw Data Table"):
@@ -76,5 +84,6 @@ with st.expander("📋 See Raw Data Table"):
         "Valuation ($)": "%.2f",    # 2 decimal places for valuation
         "Your Fee Share ($)": "%.2f",  # 2 decimal places for user's fee share
         "Your Cumulative Fees ($)": "%.2f",  # 2 decimal places for cumulative fees
-        "Cumulative Fees ($)": "%.2f"  # 2 decimal places for cumulative protocol fees
+        "Cumulative Fees ($)": "%.2f",  # 2 decimal places for cumulative protocol fees
+        "Relative Cumulative Earnings (%)": "%.2f"  # 2 decimal places for relative earnings in percent
     }))
