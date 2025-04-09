@@ -13,7 +13,7 @@ initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.45, s
 weekly_fees = st.sidebar.number_input("Weekly Fee Revenue ($)", value=20000, step=1000, format="%d")
 base_emission = st.sidebar.number_input("Initial Weekly Emission", value=300000, step=10000, format="%d")
 
-# New: input decay as a percentage (e.g. 2%)
+# Input decay as a percentage
 decay_percent = st.sidebar.number_input("Emission Decay per Week (%)", value=2.0, min_value=0.0, max_value=100.0, step=0.1, format="%.1f")
 decay_rate = 1 - decay_percent / 100  # Convert percent to multiplier
 
@@ -68,9 +68,10 @@ with col2:
 # --- Optional Data Table ---
 with st.expander("📋 See Raw Data Table"):
     st.dataframe(df.style.format({
-        "Weekly Emission": "{:.0f}",
-        "Total Supply": "{:.0f}",
-        "Valuation ($)": "${:.0f}",
-        "Your Fee Share ($)": "${:.2f}",
-        "Your Cumulative Fees ($)": "${:.2f}"
+        "Weekly Emission": "%.0f",
+        "Total Supply": "%.0f",
+        "Valuation ($)": "%.2f",
+        "Your Fee Share ($)": "%.2f",
+        "Your Cumulative Fees ($)": "%.2f",
+        "Cumulative Fees ($)": "%.2f"
     }))
