@@ -2,18 +2,20 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+# Make sure we are working with standard decimal separator (period) for inputs
 st.set_page_config(page_title="Token Emission Simulator", layout="wide")
 st.title("📈 Token Emission Schedule Simulator")
 
 # --- Sidebar Inputs ---
 st.sidebar.header("🔧 Simulation Settings")
 
+# Use explicit format settings for each input to prevent local formatting issues
 initial_tokens = st.sidebar.number_input("Initial Token Supply", value=16000000, format="%d")
 initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.45, step=0.01, format="%.2f")
 weekly_fees = st.sidebar.number_input("Weekly Fee Revenue ($)", value=20000, step=1000, format="%d")
 base_emission = st.sidebar.number_input("Initial Weekly Emission", value=300000, step=10000, format="%d")
 
-# Input decay as a percentage
+# Input decay as a percentage (percent is used for clarity)
 decay_percent = st.sidebar.number_input("Emission Decay per Week (%)", value=2.0, min_value=0.0, max_value=100.0, step=0.1, format="%.1f")
 decay_rate = 1 - decay_percent / 100  # Convert percent to multiplier
 
@@ -67,11 +69,12 @@ with col2:
 
 # --- Optional Data Table ---
 with st.expander("📋 See Raw Data Table"):
+    # Ensure all numeric columns are formatted with US decimal style (periods, no commas)
     st.dataframe(df.style.format({
-        "Weekly Emission": "%.0f",
-        "Total Supply": "%.0f",
-        "Valuation ($)": "%.2f",
-        "Your Fee Share ($)": "%.2f",
-        "Your Cumulative Fees ($)": "%.2f",
-        "Cumulative Fees ($)": "%.2f"
+        "Weekly Emission": "%.0f",  # Rounded integer for emissions
+        "Total Supply": "%.0f",     # Rounded integer for token supply
+        "Valuation ($)": "%.2f",    # 2 decimal places for valuation
+        "Your Fee Share ($)": "%.2f",  # 2 decimal places for user's fee share
+        "Your Cumulative Fees ($)": "%.2f",  # 2 decimal places for cumulative fees
+        "Cumulative Fees ($)": "%.2f"  # 2 decimal places for cumulative protocol fees
     }))
