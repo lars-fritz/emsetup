@@ -9,13 +9,14 @@ st.title("📈 Token Emission Schedule Simulator")
 # --- Sidebar Inputs ---
 st.sidebar.header("🔧 Simulation Settings")
 
-# Let user input xTokens and locked tokens
+# Editable initial token values
 initial_xtokens = st.sidebar.number_input("Initial xTokens (Voting)", value=16_000_000, step=100_000, format="%d")
 locked_tokens = st.sidebar.number_input("Locked Tokens (Non-Voting)", value=84_000_000, step=1_000_000, format="%d")
 
-initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.45, step=0.01, format="%.2f")
+# Updated default values here
+initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.25, step=0.01, format="%.2f")
 weekly_fees = st.sidebar.number_input("Weekly Fee Revenue ($)", value=20_000, step=1_000, format="%d")
-base_emission = st.sidebar.number_input("Initial Weekly Emission", value=300_000, step=10_000, format="%d")
+base_emission = st.sidebar.number_input("Initial Weekly Emission", value=1_000_000, step=10_000, format="%d")
 decay_percent = st.sidebar.number_input("Emission Decay per Week (%)", value=2.0, min_value=0.0, max_value=100.0, step=0.1, format="%.1f")
 decay_rate = 1 - (decay_percent / 100)
 weeks = st.sidebar.slider("Number of Weeks to Simulate", min_value=10, max_value=520, value=104)
