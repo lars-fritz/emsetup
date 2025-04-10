@@ -6,6 +6,16 @@ import numpy as np
 st.set_page_config(page_title="Emission Simulator", layout="wide")
 st.title("📊 Emission & Tokenomics Simulator")
 
+st.markdown("""
+Welcome to the **Token Emission & Valuation Simulator**.  
+Use the controls in the sidebar to explore how emissions, token supply, valuation, and fee generation evolve over time under customizable parameters.
+
+This simulation distinguishes between:
+- **Voting tokens** (xTokens) that participate in fee distribution,
+- **Locked tokens** which count towards the total supply but not towards voting,
+- **Weekly emissions** that decrease over time via a decay rate.
+""")
+
 # Sidebar inputs
 with st.sidebar:
     st.header("Simulation Settings")
@@ -42,24 +52,29 @@ df = pd.DataFrame({
     "Cumulative Fees ($)": cumulative_fees
 }).set_index("Week")
 
-# --- New Chart: Weekly Emissions ---
+# --- Emission Chart ---
 st.subheader("📤 Weekly Token Emissions")
+st.markdown("This plot shows how many tokens are emitted each week, declining based on the decay rate.")
 st.line_chart(df["Weekly Emission"])
 
 # --- Supply Chart ---
 st.subheader("📈 Emissions & Supply Over Time")
+st.markdown("Here you can see the growth of circulating (voting) supply and total supply including locked tokens.")
 st.line_chart(df[["Circulating Voting Supply", "Total Supply (FDV)"]])
 
 # --- Valuation Chart ---
 st.subheader("💰 Valuation Over Time")
+st.markdown("Circulating market cap and FDV are estimated using the current token price.")
 st.line_chart(df[["Valuation ($)", "FDV ($)"]])
 
 # --- Fee Chart ---
 st.subheader("🧾 Cumulative Protocol Fees")
+st.markdown("This shows the total protocol revenue (fees) accumulated over the simulation period.")
 st.line_chart(df["Cumulative Fees ($)"])
 
 # --- Table ---
 with st.expander("📋 Show Data Table"):
+    st.markdown("Explore the raw data behind the simulation.")
     st.dataframe(df.style.format({
         "Weekly Emission": "%.0f",
         "Circulating Voting Supply": "%.0f",
