@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+# Page setup
 st.set_page_config(page_title="Emission Simulator", layout="wide")
 st.title("📊 Emission & Tokenomics Simulator")
 
@@ -41,17 +42,23 @@ df = pd.DataFrame({
     "Cumulative Fees ($)": cumulative_fees
 }).set_index("Week")
 
-# Plots
-st.subheader("📈 Emissions & Supply Over Time")
-st.line_chart(df[["Weekly Emission", "Circulating Voting Supply", "Total Supply (FDV)"]])
+# --- New Chart: Weekly Emissions ---
+st.subheader("📤 Weekly Token Emissions")
+st.line_chart(df["Weekly Emission"])
 
+# --- Supply Chart ---
+st.subheader("📈 Emissions & Supply Over Time")
+st.line_chart(df[["Circulating Voting Supply", "Total Supply (FDV)"]])
+
+# --- Valuation Chart ---
 st.subheader("💰 Valuation Over Time")
 st.line_chart(df[["Valuation ($)", "FDV ($)"]])
 
+# --- Fee Chart ---
 st.subheader("🧾 Cumulative Protocol Fees")
 st.line_chart(df["Cumulative Fees ($)"])
 
-# Data table
+# --- Table ---
 with st.expander("📋 Show Data Table"):
     st.dataframe(df.style.format({
         "Weekly Emission": "%.0f",
@@ -61,4 +68,3 @@ with st.expander("📋 Show Data Table"):
         "FDV ($)": "%.2f",
         "Cumulative Fees ($)": "%.2f"
     }))
-
