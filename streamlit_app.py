@@ -9,8 +9,9 @@ st.title("📈 Token Emission Schedule Simulator")
 # --- Sidebar Inputs ---
 st.sidebar.header("🔧 Simulation Settings")
 
-initial_xtokens = 16_000_000  # These are staked and vote
-locked_tokens = 84_000_000    # Do not vote, just add to FDV
+# Let user input xTokens and locked tokens
+initial_xtokens = st.sidebar.number_input("Initial xTokens (Voting)", value=16_000_000, step=100_000, format="%d")
+locked_tokens = st.sidebar.number_input("Locked Tokens (Non-Voting)", value=84_000_000, step=1_000_000, format="%d")
 
 initial_price = st.sidebar.number_input("Initial Token Price ($)", value=0.45, step=0.01, format="%.2f")
 weekly_fees = st.sidebar.number_input("Weekly Fee Revenue ($)", value=20_000, step=1_000, format="%d")
