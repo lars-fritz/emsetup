@@ -21,6 +21,8 @@ decay_percent = st.sidebar.number_input("Emission Decay per Week (%)", value=2.0
 decay_rate = 1 - (decay_percent / 100)
 weeks = st.sidebar.slider("Number of Weeks to Simulate", min_value=10, max_value=520, value=104)
 my_tokens = st.sidebar.number_input("Your Token Holdings (Voting xTokens)", value=10_000, format="%d")
+my_token_value_usd = my_tokens * initial_price
+st.sidebar.markdown(f"**Your Token Value:** ${my_token_value_usd:,.2f}")
 
 # --- Simulation ---
 weeks_array = np.arange(weeks)
