@@ -88,4 +88,3 @@ with st.expander("📋 Show Data Table"):
         "lsToken Relative Earnings (%)": "%.2f",
         "lsToken Holdings": "%.2f"
     }))
-
