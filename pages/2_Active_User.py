@@ -48,8 +48,7 @@ with st.sidebar:
     st.markdown(f"**Hatching Tokens:** {hatching_tokens}")
 
     # --- Asset receiving emission ---
-    asset_percent = st.slider("Percentage of Emission Allocated to Asset (%)", min_value=0, max_value=100, value=10)
-    total_asset_volume = 100_000_000  # $100 million total trade volume for the asset
+    total_asset_volume = st.number_input("Total Asset Trade Volume ($)", value=100_000_000)  # Default to 100 million
     user_asset_volume = st.number_input("Your Asset Volume ($)", value=2_000_000)  # User's asset volume (e.g., $2M)
 
     # --- Calculate the user's share of the emissions based on their asset volume ---
