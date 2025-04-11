@@ -47,6 +47,10 @@ with st.sidebar:
     st.markdown(f"**Multiplying Tokens:** {multiplying_tokens}")
     st.markdown(f"**Hatching Tokens:** {hatching_tokens}")
 
+    # --- Asset receiving emission ---
+    asset_percent = st.slider("Percentage of Emission Allocated to Asset (%)", min_value=0, max_value=100, value=10)
+    total_asset_volume = 100_000_000  # $100 million
+
 # --- Simulate emissions and supply ---
 weeks_array = np.arange(weeks)
 weekly_emissions = base_emission * (decay_rate ** weeks_array)
@@ -67,13 +71,19 @@ adjusted_multiplying_tokens = multiplying_tokens * multiplier_array
 multiplying_share = adjusted_multiplying_tokens / circulating_supply
 multiplying_weekly_fees = multiplying_share * weekly_fees
 
-# --- Fee Calculation for Hatching Tokens (Not Implemented Yet) ---
-# Placeholder for future logic for hatching tokens
-hatching_weekly_fees = np.zeros(weeks)  # Temporary zero values
+# --- Fee Calculation for Hatching Tokens ---
+hatching_weekly_fees = np.zeros(weeks)  # Temporary zero values for hatching tokens
+
+# --- Asset Receiving Emission ---
+asset_weekly_emission = (asset_percent / 100) * weekly_emissions
+asset_value_in_dollars = asset_weekly_emission * initial_price  # Convert to dollar value based on token price
 
 # --- Combine Fee Calculations ---
 total_weekly_fees = voting_weekly_fees + multiplying_weekly_fees + hatching_weekly_fees
 total_cumulative_fees = np.cumsum(total_weekly_fees)
+
+# --- Asset Volume Calculation ---
+asset_cumulative_value = np.cumsum(asset_value_in_dollars)
 
 # --- Result Outputs ---
 df = pd.DataFrame({
@@ -81,16 +91,21 @@ df = pd.DataFrame({
     "Voting Weekly Fees": voting_weekly_fees,
     "Multiplying Weekly Fees": multiplying_weekly_fees,
     "Hatching Weekly Fees": hatching_weekly_fees,
+    "Asset Emission Value ($)": asset_value_in_dollars,
     "Total Weekly Fees": total_weekly_fees,
-    "Cumulative Fees": total_cumulative_fees
+    "Cumulative Fees ($)": total_cumulative_fees,
+    "Asset Cumulative Value ($)": asset_cumulative_value
 }).set_index("Week")
 
 # --- Plots ---
 st.subheader("📊 Fee Earnings Over Time")
 st.line_chart(df[["Voting Weekly Fees", "Multiplying Weekly Fees", "Hatching Weekly Fees", "Total Weekly Fees"]])
 
-st.subheader("💸 Cumulative Fees Over Time")
-st.line_chart(df["Cumulative Fees"])
+st.subheader("💸 Asset Value Allocated Over Time")
+st.line_chart(df["Asset Emission Value ($)"])
+
+st.subheader("💰 Cumulative Fees and Asset Value Over Time")
+st.line_chart(df[["Cumulative Fees ($)", "Asset Cumulative Value ($)"]])
 
 # --- Data Table ---
 with st.expander("📋 Show Simulation Data"):
@@ -98,6 +113,8 @@ with st.expander("📋 Show Simulation Data"):
         "Voting Weekly Fees": "%.2f",
         "Multiplying Weekly Fees": "%.2f",
         "Hatching Weekly Fees": "%.2f",
+        "Asset Emission Value ($)": "%.2f",
         "Total Weekly Fees": "%.2f",
-        "Cumulative Fees": "%.2f"
+        "Cumulative Fees ($)": "%.2f",
+        "Asset Cumulative Value ($)": "%.2f"
     }))
