@@ -13,6 +13,7 @@ try:
     initial_price = st.session_state.initial_price
     base_emission = st.session_state.base_emission
     decay_percent = st.session_state.decay_percent
+    weekly_fees = st.session_state.weekly_fees
     weeks = st.session_state.weeks
 except AttributeError:
     st.error("⚠️ Please visit the main page first to set the tokenomics parameters.")
@@ -39,11 +40,6 @@ with st.sidebar:
     st.markdown(f"- 🚀 Multiplying: `{multiplying_pct}%` → {my_total_tokens * multiplying_pct / 100:.0f} tokens")
     st.markdown(f"- 🐣 Hatching: `{hatching_pct}%` → {my_total_tokens * hatching_pct / 100:.0f} tokens")
 
-    st.markdown("---")
-    st.markdown("### Emission Asset Settings")
-    emission_pct = st.slider("Asset Emission Share (%)", 0, 100, 10)
-    asset_volume = st.number_input("Total Asset Volume ($)", value=100_000_000, step=1_000_000, format="%d")
-
 # --- Emission & Supply Simulation ---
 weeks_array = np.arange(weeks)
 weekly_emissions = base_emission * (decay_rate ** weeks_array)
@@ -53,12 +49,9 @@ circulating_supply = initial_xtokens + cumulative_emissions
 # --- Token Allocations ---
 voting_tokens = my_total_tokens * voting_pct / 100
 
-# --- Asset Emission Share ---
-asset_emission = (emission_pct / 100) * weekly_emissions
-
-# --- Calculate Weekly Fees Based on Dynamic Share ---
+# --- Calculate Weekly Fees Based on Dynamic Share of Weekly Fee Pool ($20k) ---
 voting_share = voting_tokens / circulating_supply
-voting_weekly_fees = voting_share * asset_emission
+voting_weekly_fees = voting_share * weekly_fees
 voting_cumulative_fees = np.cumsum(voting_weekly_fees)
 
 # --- DataFrame ---
