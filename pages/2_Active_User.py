@@ -29,7 +29,7 @@ with st.sidebar:
     multiplier_tokens = st.number_input("Tokens for Multiplier Staking", value=3000, max_value=my_tokens - voting_tokens)
 
     volume_tokens = my_tokens - voting_tokens - multiplier_tokens
-    st.markdown(f"**Tokens for Volume-based Emissions**: {volume_tokens} tokens")
+    st.markdown(f"**Tokens for Hatching (Unused)**: {volume_tokens} tokens")
 
     st.markdown(f"**Total Value:** ${my_tokens * initial_price:,.2f}")
 
@@ -62,15 +62,13 @@ with col3:
     user_volume = st.number_input("Your Weekly Volume ($)", value=2_000_000, step=100_000)
 
 # --- Volume Emissions Logic ---
-# Explanation:
-# - Volume tokens are used to calculate a static multiplier: 1 + (your share vs benchmark) * 3
-# - Your effective volume is then: user_volume * multiplier
-# - You earn emissions: your effective volume / total adjusted volume * 10% of weekly emissions
-
 benchmark_stake = 5000
-user_ratio = volume_tokens / (volume_tokens + benchmark_stake)
+
+# Use multiplier_tokens for the multiplier
+user_ratio = multiplier_tokens / (multiplier_tokens + benchmark_stake)
 volume_multiplier = 1 + user_ratio * 3
 
+# Calculate effective volume per week
 effective_user_volume = user_volume * volume_multiplier
 adjusted_total_volume = platform_volume - user_volume + effective_user_volume
 
@@ -98,28 +96,36 @@ st.line_chart(
 
 # --- Explanation Section ---
 with st.expander("📘 How Are Volume Rewards Calculated?"):
-    st.markdown("""
+    st.markdown(f"""
     **Volume-based Emissions Logic**:
 
-    - Each week, 10% of the platform emissions go to an asset.
+    - Each week, a percentage of platform emissions (you specify the % as *Asset Weight*) goes to a specific asset.
     - You specify:
-        - Your `volume_tokens` stake.
-        - Weekly trading volume on the asset.
-        - Your own weekly trading volume.
-
-    - A static multiplier is applied to your volume:
-        \n`multiplier = 1 + (volume_tokens / (volume_tokens + 5000)) * 3`
-
-    - Your **effective volume** is then:
-        \n`effective_volume = your_volume * multiplier`
-
-    - The **adjusted total volume** on the asset is:
-        \n`adjusted_volume = total_volume - your_volume + effective_volume`
+        - Your **trading volume** on this asset.
+        - The **total platform volume** on the same asset.
+        - Your **multiplier stake** (tokens staked for multiplier).
+    
+    - A **static multiplier** is computed:
+        ```
+        multiplier = 1 + (multiplier_tokens / (multiplier_tokens + 5000)) * 3
+        ```
+    
+    - Your **effective volume** is:
+        ```
+        effective_volume = your_volume * multiplier
+        ```
+    
+    - The **adjusted total volume** on the asset:
+        ```
+        adjusted_volume = platform_volume - your_volume + effective_volume
+        ```
 
     - You earn:
-        \n`(effective_volume / adjusted_volume) * asset_emissions`
+        ```
+        (effective_volume / adjusted_volume) * (emissions allocated to this asset)
+        ```
 
-    This is shown in comparison to the baseline where no multiplier is applied.
+    - A comparison is plotted vs the scenario where **no multiplier** is applied.
     """)
 
 # --- Data Table ---
@@ -144,3 +150,4 @@ with st.expander("📋 Show Simulation Data"):
         "Volume Weekly Rewards (No Multiplier)": "%.2f",
         "Cumulative Volume Rewards (No Multiplier)": "%.2f"
     }))
+
