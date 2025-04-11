@@ -52,24 +52,24 @@ circulating_supply = initial_xtokens + cumulative_emissions
 
 # --- Token Allocations ---
 voting_tokens = my_total_tokens * voting_pct / 100
-multiplier_tokens = my_total_tokens * multiplying_pct / 100
-hatching_tokens = my_total_tokens * hatching_pct / 100
 
-# --- Asset Emission Fees ---
+# --- Asset Emission Share ---
 asset_emission = (emission_pct / 100) * weekly_emissions
 
-# --- Voting Token Calculations ---
-user_volume_share = my_total_tokens / asset_volume
-voting_weekly_fees = user_volume_share * asset_emission
-voting_share_pct = (voting_tokens / circulating_supply) * 100
+# --- Calculate Weekly Fees Based on Dynamic Share ---
+voting_share = voting_tokens / circulating_supply
+voting_weekly_fees = voting_share * asset_emission
+voting_cumulative_fees = np.cumsum(voting_weekly_fees)
 
-# --- DataFrame for Plotting ---
+# --- DataFrame ---
 df = pd.DataFrame({
     "Week": weeks_array,
-    "Voting Token Share (%)": voting_share_pct,
-    "Voting Weekly Fees ($)": voting_weekly_fees
+    "Voting Share": voting_share,
+    "Weekly Fees": voting_weekly_fees,
+    "Cumulative Fees": voting_cumulative_fees
 }).set_index("Week")
 
 # --- Plot ---
-st.subheader("📈 Voting Token Share vs Weekly Fees Earned")
-st.line_chart(df[["Voting Token Share (%)", "Voting Weekly Fees ($)"]])
+st.subheader("📈 Cumulative Fees from Voting Over Time")
+st.line_chart(df["Cumulative Fees"])
+
