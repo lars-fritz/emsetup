@@ -111,10 +111,14 @@ df = pd.DataFrame({
     "Volume Weekly Rewards": user_weekly_rewards,
     "Cumulative Volume Rewards": user_cumulative_rewards,
     "Baseline Volume Rewards (No Multiplier)": np.cumsum(baseline_rewards),
+    "Baseline Weekly Rewards (No Multiplier)": baseline_rewards,
     "Multiplier": effective_multiplier
 }).set_index("Week")
 
-# --- Plot Volume Emissions ---
+# --- Plots for Volume Emissions ---
+st.subheader("📊 Weekly Volume-Based Rewards")
+st.line_chart(df[["Volume Weekly Rewards", "Baseline Weekly Rewards (No Multiplier)"]])
+
 st.subheader("📈 Cumulative Volume-Based Rewards")
 st.line_chart(df[["Cumulative Volume Rewards", "Baseline Volume Rewards (No Multiplier)"]])
 
@@ -132,7 +136,7 @@ st.markdown("""
     - The user earns a share of these emissions based on their *effective volume*, boosted by their multiplier.
     - Multiplier: `1 + 3 * (effective stake / (effective stake + reference stake))` where `effective stake = stake * 1.05^week`
     - Adjusted total volume accounts for your boosted volume replacing your original share.
-- **Comparison**: The chart shows how your rewards compare to no multiplier at all.
+- **Comparison**: Both weekly and cumulative charts show how your rewards compare to no multiplier at all.
 """)
 
 # --- Data Table ---
@@ -144,5 +148,6 @@ with st.expander("📋 Show Simulation Data"):
         "Volume Weekly Rewards": "%.2f",
         "Cumulative Volume Rewards": "%.2f",
         "Baseline Volume Rewards (No Multiplier)": "%.2f",
+        "Baseline Weekly Rewards (No Multiplier)": "%.2f",
         "Multiplier": "%.2f"
     }))
