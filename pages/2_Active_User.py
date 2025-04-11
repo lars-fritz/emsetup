@@ -24,26 +24,18 @@ decay_rate = 1 - (decay_percent / 100)
 # --- Sidebar Inputs ---
 with st.sidebar:
     st.header("Active User Settings")
-    my_tokens = st.number_input("Your Token Holdings", value=10_000, format="%d")
+    my_tokens = st.number_input("Your Total Token Holdings", value=10_000, format="%d")
 
-    st.subheader("🧮 Token Allocation (%)")
-    vote_alloc = st.slider("Voting Allocation", 0, 100, 40)
-    multi_alloc = st.slider("Multiplier Staking Allocation", 0, 100, 30)
-    hatch_alloc = st.slider("Hatching Allocation", 0, 100, 30)
+    st.subheader("🎯 Token Allocation (by amount)")
+    vote_tokens = st.number_input("Tokens allocated to Voting", value=4000, step=100)
+    multi_tokens = st.number_input("Tokens allocated to Multiplier Staking", value=3000, step=100)
+    hatch_tokens = st.number_input("Tokens allocated to Hatching", value=3000, step=100)
 
-# --- Normalize Allocation ---
-total_alloc = vote_alloc + multi_alloc + hatch_alloc
-if total_alloc == 0:
-    st.warning("⚠️ Please allocate at least one category.")
+# --- Validate Allocation ---
+allocated_total = vote_tokens + multi_tokens + hatch_tokens
+if allocated_total > my_tokens:
+    st.error(f"🚫 Allocated {allocated_total:,} tokens but you only have {my_tokens:,}. Please reduce allocations.")
     st.stop()
-
-vote_frac = vote_alloc / total_alloc
-multi_frac = multi_alloc / total_alloc
-hatch_frac = hatch_alloc / total_alloc
-
-vote_tokens = my_tokens * vote_frac
-multi_tokens = my_tokens * multi_frac
-hatch_tokens = my_tokens * hatch_frac
 
 # --- Simulate emissions and supply ---
 weeks_array = np.arange(weeks)
@@ -64,3 +56,11 @@ df = pd.DataFrame({
 }).set_index("Week")
 
 st.line_chart(df["Cumulative Voting Fees"])
+
+# Optional display
+with st.expander("📋 Show Token Allocation"):
+    st.write(f"Total Tokens: `{my_tokens}`")
+    st.write(f"- Voting: `{vote_tokens}`")
+    st.write(f"- Multiplier Staking: `{multi_tokens}`")
+    st.write(f"- Hatching: `{hatch_tokens}`")
+    st.write(f"✅ Total Allocated: `{allocated_total}`")
