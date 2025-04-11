@@ -105,3 +105,4 @@ with st.expander("📋 Show Simulation Data"):
         "Cumulative Fees": "%.2f",
         "Relative Earnings (%)": "%.2f"
     }))
+
