@@ -62,15 +62,22 @@ col1, col2, col3 = st.columns(3)
 with col1:
     asset_weight = st.number_input("Asset Weight (% of Total Emissions)", value=10.0, step=0.5) / 100
 with col2:
-    total_volume = st.number_input("Total Volume on Asset ($)", value=100_000_000, step=1_000_000)
+    platform_volume = st.number_input("Total Volume on Asset ($)", value=100_000_000, step=1_000_000)
 with col3:
     user_volume = st.number_input("Your Weekly Volume ($)", value=2_000_000, step=100_000)
 
-# --- Volume Emissions Logic ---
+# --- Multiplier-Enhanced Volume Emissions ---
+competing_stake = 5000  # constant external competing stake
+effective_stakes = volume_tokens * (1.05 ** weeks_array)
+ratios = effective_stakes / (effective_stakes + competing_stake)
+volume_multipliers = 1 + (ratios * 3)
+
+boosted_user_volumes = user_volume * volume_multipliers
+adjusted_total_volumes = platform_volume - user_volume + boosted_user_volumes
 asset_weekly_emissions = weekly_emissions * asset_weight
-user_share_of_volume = user_volume / total_volume
-user_weekly_rewards = user_share_of_volume * asset_weekly_emissions
-user_cumulative_rewards = np.cumsum(user_weekly_rewards)
+
+volume_weekly_rewards = (boosted_user_volumes / adjusted_total_volumes) * asset_weekly_emissions
+cumulative_volume_rewards = np.cumsum(volume_weekly_rewards)
 
 # --- Data Aggregation ---
 df = pd.DataFrame({
@@ -78,14 +85,29 @@ df = pd.DataFrame({
     "Voting Weekly Fees": voting_weekly_fees,
     "Cumulative Voting Fees": user_cumulative_fees,
     "Relative Voting Earnings (%)": relative_pct,
-    "Volume Weekly Rewards": user_weekly_rewards,
-    "Cumulative Volume Rewards": user_cumulative_rewards,
-    "Multiplier": multiplier_array
+    "Boosted Volume": boosted_user_volumes,
+    "Volume Weekly Rewards": volume_weekly_rewards,
+    "Cumulative Volume Rewards": cumulative_volume_rewards,
+    "Volume Multiplier": volume_multipliers
 }).set_index("Week")
 
-# --- ROI Plot ---
-st.subheader("💸 Relative ROI from Voting Over Time (%)")
-st.line_chart(df["Relative Voting Earnings (%)"])
+# --- Volume Reward Plot ---
+st.subheader("📈 Weekly Rewards from Volume Staking (Multiplier-Based)")
+st.line_chart(df["Volume Weekly Rewards"])
+
+# --- Explanation ---
+st.markdown("""
+### 📘 Explanation: Volume-Based Emissions with Stake-Based Multiplier
+
+- You allocate a fixed number of tokens for volume staking.
+- Each week, your **effective stake** increases by 5% (though the actual stake remains the same).
+- Your share of emissions depends on your **boosted trading volume**, calculated as:
+  - `effective_stake_ratio = effective_stake / (effective_stake + competing_stake)`
+  - `multiplier = 1 + (effective_stake_ratio × 3)`
+  - `boosted_volume = your_volume × multiplier`
+- Your reward is then:
+  - `(boosted_volume / total_volume_with_adjustments) × emissions × asset_weight`
+""")
 
 # --- Data Table ---
 with st.expander("📋 Show Simulation Data"):
@@ -93,7 +115,8 @@ with st.expander("📋 Show Simulation Data"):
         "Voting Weekly Fees": "%.2f",
         "Cumulative Voting Fees": "%.2f",
         "Relative Voting Earnings (%)": "%.2f",
+        "Boosted Volume": "%.2f",
         "Volume Weekly Rewards": "%.2f",
         "Cumulative Volume Rewards": "%.2f",
-        "Multiplier": "%.2f"
+        "Volume Multiplier": "%.2f"
     }))
