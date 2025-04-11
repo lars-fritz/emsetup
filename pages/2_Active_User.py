@@ -24,6 +24,12 @@ with st.sidebar:
     st.header("Active User Settings")
 
     my_tokens = st.number_input("Your Token Holdings", value=10_000, format="%d")
+    
+    # Split tokens between voting and volume-based staking
+    voting_tokens = st.number_input("Tokens for Voting on Fees", value=5000, max_value=my_tokens)
+    volume_tokens = my_tokens - voting_tokens
+    st.markdown(f"**Tokens for Volume-based Emissions**: {volume_tokens} tokens")
+
     staking_mode = st.radio("Staking Mode", ["Voting (earn fees)", "Multiplier staking (no fees at first)"])
 
     st.markdown(f"**Current Value:** ${my_tokens * initial_price:,.2f}")
@@ -40,21 +46,9 @@ max_multiplier = 20
 growth_rate = 0.07  # Adjust this to tweak how fast multiplier grows
 multiplier_array = 1 + (max_multiplier - 1) * (1 - np.exp(-growth_rate * weeks_array))
 
-# --- Fee Calculation ---
-if staking_mode == "Voting (earn fees)":
-    user_share = my_tokens / circulating_supply
-    user_weekly_fees = user_share * weekly_fees
-    multiplier_used = np.ones(weeks)
-else:
-    # Multiplier staking: rewards grow based on multiplier, no extra token amount
-    adjusted_tokens = my_tokens * multiplier_array
-    user_share = adjusted_tokens / circulating_supply
-    user_weekly_fees = user_share * weekly_fees
-    multiplier_used = multiplier_array
-
-# --- Result outputs ---
-user_cumulative_fees = np.cumsum(user_weekly_fees)
-relative_pct = (user_cumulative_fees / (my_tokens * initial_price)) * 100
+# --- Fee Calculation for Voting ---
+voting_share = voting_tokens / circulating_supply
+voting_weekly_fees = voting_share * weekly_fees
 
 # --- Volume-based Emissions Section (New feature) ---
 st.subheader("📦 Emissions from Trading Volume (Multiplier Logic)")
@@ -76,33 +70,33 @@ user_share_of_volume = user_volume / total_volume
 user_weekly_rewards = user_share_of_volume * asset_weekly_emissions
 user_cumulative_rewards = np.cumsum(user_weekly_rewards)
 
-# Create a DataFrame for the cumulative rewards from trading volume
-df_multiplier = pd.DataFrame({
+# --- Cumulative Rewards ---
+user_cumulative_fees = np.cumsum(voting_weekly_fees)
+relative_pct = (user_cumulative_fees / (my_tokens * initial_price)) * 100
+
+# Create DataFrame for voting and volume rewards
+df = pd.DataFrame({
     "Week": weeks_array,
-    "User Weekly Multiplier Rewards": user_weekly_rewards,
-    "Cumulative Multiplier Rewards": user_cumulative_rewards
+    "Voting Weekly Fees": voting_weekly_fees,
+    "Cumulative Voting Fees": user_cumulative_fees,
+    "Relative Voting Earnings (%)": relative_pct,
+    "Volume Weekly Rewards": user_weekly_rewards,
+    "Cumulative Volume Rewards": user_cumulative_rewards
 }).set_index("Week")
 
-# Plot the cumulative rewards
-st.line_chart(df_multiplier["Cumulative Multiplier Rewards"])
-
 # --- Plots ---
-st.subheader("📊 Fee Earnings Over Time")
-st.line_chart(df[["Your Weekly Fees", "Cumulative Fees"]])
+st.subheader("📊 Cumulative Fees and Rewards (Voting + Volume)")
+st.line_chart(df[["Cumulative Voting Fees", "Cumulative Volume Rewards"]])
 
 st.subheader("💸 Relative ROI Over Time (%)")
-st.line_chart(df["Relative Earnings (%)"])
+st.line_chart(df["Relative Voting Earnings (%)"])
 
-if staking_mode != "Voting (earn fees)":
-    st.subheader("⚡ Multiplier Growth Over Time")
-    st.line_chart(df["Multiplier"])
-
-# Data Table for Fee Earnings
+# Data Table for Fee Earnings and Volume Rewards
 with st.expander("📋 Show Simulation Data"):
     st.dataframe(df.style.format({
-        "Multiplier": "%.2f",
-        "Your Weekly Fees": "%.2f",
-        "Cumulative Fees": "%.2f",
-        "Relative Earnings (%)": "%.2f"
+        "Voting Weekly Fees": "%.2f",
+        "Cumulative Voting Fees": "%.2f",
+        "Relative Voting Earnings (%)": "%.2f",
+        "Volume Weekly Rewards": "%.2f",
+        "Cumulative Volume Rewards": "%.2f"
     }))
-
