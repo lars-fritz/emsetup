@@ -66,18 +66,34 @@ with col2:
 with col3:
     user_volume = st.number_input("Your Weekly Volume ($)", value=2_000_000, step=100_000)
 
-# --- Multiplier-Enhanced Volume Emissions ---
-competing_stake = 5000  # constant external competing stake
-effective_stakes = volume_tokens * (1.05 ** weeks_array)
-ratios = effective_stakes / (effective_stakes + competing_stake)
-volume_multipliers = 1 + (ratios * 3)
+# --- Volume Emissions Logic with Multiplier ---
+effective_stake = volume_tokens
+benchmark_stake = 5000
+multiplied_stake = []
 
-boosted_user_volumes = user_volume * volume_multipliers
-adjusted_total_volumes = platform_volume - user_volume + boosted_user_volumes
+for week in weeks_array:
+    effective = effective_stake * (1.05 ** week)
+    ratio = effective / (effective + benchmark_stake)
+    multiplier = 1 + ratio * 3
+    multiplied_stake.append(multiplier)
+
+multiplied_stake = np.array(multiplied_stake)
+
+# Effective volume and adjusted platform volume
+effective_user_volume = user_volume * multiplied_stake
+adjusted_total_volume = platform_volume - user_volume + effective_user_volume
+
+# Weekly emissions to asset
 asset_weekly_emissions = weekly_emissions * asset_weight
 
-volume_weekly_rewards = (boosted_user_volumes / adjusted_total_volumes) * asset_weekly_emissions
-cumulative_volume_rewards = np.cumsum(volume_weekly_rewards)
+# User share and rewards
+user_volume_share = effective_user_volume / adjusted_total_volume
+user_weekly_rewards = user_volume_share * asset_weekly_emissions
+user_cumulative_rewards = np.cumsum(user_weekly_rewards)
+
+# --- Baseline Rewards (No Multiplier) ---
+baseline_rewards = (user_volume / platform_volume) * asset_weekly_emissions
+cumulative_baseline_rewards = np.cumsum(baseline_rewards)
 
 # --- Data Aggregation ---
 df = pd.DataFrame({
@@ -85,29 +101,25 @@ df = pd.DataFrame({
     "Voting Weekly Fees": voting_weekly_fees,
     "Cumulative Voting Fees": user_cumulative_fees,
     "Relative Voting Earnings (%)": relative_pct,
-    "Boosted Volume": boosted_user_volumes,
-    "Volume Weekly Rewards": volume_weekly_rewards,
-    "Cumulative Volume Rewards": cumulative_volume_rewards,
-    "Volume Multiplier": volume_multipliers
+    "Volume Weekly Rewards": user_weekly_rewards,
+    "Cumulative Volume Rewards": user_cumulative_rewards,
+    "Baseline Volume Rewards": baseline_rewards,
+    "Cumulative Baseline Rewards": cumulative_baseline_rewards,
+    "Volume Multiplier": multiplied_stake,
+    "Multiplier Curve": multiplier_array
 }).set_index("Week")
 
-# --- Volume Reward Plot ---
-st.subheader("📈 Weekly Rewards from Volume Staking (Multiplier-Based)")
-st.line_chart(df["Volume Weekly Rewards"])
+# --- ROI Plot ---
+st.subheader("💸 Relative ROI from Voting Over Time (%)")
+st.line_chart(df["Relative Voting Earnings (%)"])
 
-# --- Explanation ---
-st.markdown("""
-### 📘 Explanation: Volume-Based Emissions with Stake-Based Multiplier
+# --- Weekly Comparison Plot ---
+st.subheader("📈 Weekly Rewards from Volume Staking (with vs. without Multiplier)")
+st.line_chart(df[["Volume Weekly Rewards", "Baseline Volume Rewards"]])
 
-- You allocate a fixed number of tokens for volume staking.
-- Each week, your **effective stake** increases by 5% (though the actual stake remains the same).
-- Your share of emissions depends on your **boosted trading volume**, calculated as:
-  - `effective_stake_ratio = effective_stake / (effective_stake + competing_stake)`
-  - `multiplier = 1 + (effective_stake_ratio × 3)`
-  - `boosted_volume = your_volume × multiplier`
-- Your reward is then:
-  - `(boosted_volume / total_volume_with_adjustments) × emissions × asset_weight`
-""")
+# --- Cumulative Comparison Plot ---
+st.subheader("📊 Cumulative Rewards from Volume Staking")
+st.line_chart(df[["Cumulative Volume Rewards", "Cumulative Baseline Rewards"]])
 
 # --- Data Table ---
 with st.expander("📋 Show Simulation Data"):
@@ -115,8 +127,9 @@ with st.expander("📋 Show Simulation Data"):
         "Voting Weekly Fees": "%.2f",
         "Cumulative Voting Fees": "%.2f",
         "Relative Voting Earnings (%)": "%.2f",
-        "Boosted Volume": "%.2f",
         "Volume Weekly Rewards": "%.2f",
         "Cumulative Volume Rewards": "%.2f",
+        "Baseline Volume Rewards": "%.2f",
+        "Cumulative Baseline Rewards": "%.2f",
         "Volume Multiplier": "%.2f"
     }))
