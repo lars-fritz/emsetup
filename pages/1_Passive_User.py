@@ -5,23 +5,28 @@ import numpy as np
 st.set_page_config(page_title="Passive User", layout="wide")
 st.title("🧍 Passive User Fee Earnings")
 
-# User inputs
+# --- Pull simulation settings from main page ---
+try:
+    initial_xtokens = st.session_state.initial_xtokens
+    locked_tokens = st.session_state.locked_tokens
+    initial_price = st.session_state.initial_price
+    weekly_fees = st.session_state.weekly_fees
+    base_emission = st.session_state.base_emission
+    decay_percent = st.session_state.decay_percent
+    weeks = st.session_state.weeks
+except AttributeError:
+    st.error("⚠️ Please visit the main page first to set the tokenomics parameters.")
+    st.stop()
+
+decay_rate = 1 - (decay_percent / 100)
+
+# --- Sidebar inputs ---
 with st.sidebar:
     st.header("Passive User Settings")
     my_tokens = st.number_input("Your Token Holdings (Voting)", value=10_000, format="%d")
-    initial_price = st.number_input("Initial Token Price ($)", value=0.25, step=0.01, format="%.2f")
     st.markdown(f"**Current Value:** ${my_tokens * initial_price:,.2f}")
 
-# Load shared assumptions
-initial_xtokens = 16_000_000
-locked_tokens = 84_000_000
-weekly_fees = 20_000
-base_emission = 800_000
-decay_percent = 2.0
-decay_rate = 1 - (decay_percent / 100)
-weeks = 104
-
-# Emission & supply simulation
+# --- Emission & Supply Simulation ---
 weeks_array = np.arange(weeks)
 weekly_emissions = base_emission * (decay_rate ** weeks_array)
 cumulative_emissions = np.cumsum(weekly_emissions)
@@ -49,7 +54,7 @@ for i in range(weeks):
 cumulative_ls_fees = np.cumsum(ls_fees)
 relative_ls_pct = (cumulative_ls_fees / (my_tokens * initial_price)) * 100
 
-# DataFrame
+# --- DataFrame ---
 df = pd.DataFrame({
     "Week": weeks_array,
     "Your Weekly Fees": user_weekly_fees,
@@ -62,7 +67,6 @@ df = pd.DataFrame({
 }).set_index("Week")
 
 # --- Plots ---
-
 st.subheader("💸 Relative Cumulative Earnings (%) – Self voting")
 st.line_chart(df["Relative Earnings (%)"])
 
@@ -82,7 +86,7 @@ st.line_chart(df[["Relative Earnings (%)", "lsToken Relative Earnings (%)"]])
 st.subheader("📥 lsToken Holdings Over Time")
 st.line_chart(df["lsToken Holdings"])
 
-# Show raw data
+# --- Data Table ---
 with st.expander("📋 Show Data Table"):
     st.dataframe(df.style.format({
         "Your Weekly Fees": "%.2f",
@@ -93,5 +97,4 @@ with st.expander("📋 Show Data Table"):
         "lsToken Relative Earnings (%)": "%.2f",
         "lsToken Holdings": "%.2f"
     }))
-
 
