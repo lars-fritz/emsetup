@@ -66,12 +66,14 @@ df = pd.DataFrame({
 st.subheader("💸 Relative Cumulative Earnings (%) – Self voting")
 st.line_chart(df["Relative Earnings (%)"])
 
-st.subheader("📊 Fee Earnings Over Time – Self voting")
+st.subheader("📊 Fee Earnings Over Time – Self voting - weekly fees")
 st.line_chart(df["Your Weekly Fees"])
+st.subheader("📊 Fee Earnings Over Time – Self voting - cumulative fees")
 st.line_chart(df["Cumulative Fees"])
 
-st.subheader("🔁 Self-Compounding Earnings for passive participant with lsTokens")
+st.subheader("🔁 Self-Compounding Earnings for passive participant with lsTokens - weekly fees")
 st.line_chart(df["lsToken Weekly Fees"])
+st.subheader("🔁 Self-Compounding Earnings for passive participant with lsTokens - cumulative fees")
 st.line_chart(df["lsToken Cumulative Fees"])
 
 st.subheader("📈 Relative Earnings (%) – Self voting vs lsToken")
