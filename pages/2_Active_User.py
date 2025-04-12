@@ -127,17 +127,33 @@ st.subheader("💸 Relative ROI from Voting Over Time (%)")
 st.line_chart(df["Relative Voting Earnings (%)"])
 
 # --- Explanation ---
-st.markdown("""
-### 🧠 Calculation Logic
+with st.expander("📘 Explanation of Calculation Logic"):
+    st.markdown("""
+    This dashboard simulates active user earnings through two mechanisms: **Voting Rewards** and **Volume-Based Rewards with Multipliers**.
 
-- **Voting Rewards**: Your voting tokens are divided by circulating supply each week to determine share of the $weekly_fees.
-- **Volume Emissions**:
-    - 10% of the weekly emissions go to a specific trading asset.
-    - The user earns a share of these emissions based on their *effective volume*, boosted by their multiplier.
-    - Multiplier: `1 + 3 * (effective stake / (effective stake + reference stake))` where `effective stake = stake * 1.05^week`
-    - Adjusted total volume accounts for your boosted volume replacing your original share.
-- **Comparison**: Both weekly and cumulative charts show how your rewards compare to no multiplier at all.
-""")
+    #### Voting Rewards
+    - Weekly fees are distributed to all voting token holders.
+    - Your voting share = `voting tokens / circulating supply`, recalculated weekly as emissions decay.
+
+    #### Volume-Based Emissions
+    - A fraction (default 10%) of the emissions is allocated to a specific trading asset.
+    - Your weekly trading volume is boosted with a **multiplier** that depends on the tokens you stake for it.
+    - **Multiplier Formula**:
+        - `effective stake = staked tokens * 1.05^week`
+        - `multiplier = 1 + 3 * (effective stake / (effective stake + reference stake))`
+        - This multiplier grows with time and staking.
+    - Your **effective volume** is: `user volume * multiplier`
+    - Your emissions share = `effective volume / adjusted total volume`, where adjusted volume replaces your own volume with your boosted volume.
+
+    #### Comparison with No Multiplier
+    - For reference, emissions are also calculated using a flat (non-boosted) volume, so you can see the performance uplift.
+
+    #### Token Usage
+    - You divide your token holdings across three buckets:
+        - Voting Tokens: Used to claim fee share.
+        - Multiplier Tokens: Used to boost volume rewards.
+        - Hatching Tokens: Leftover tokens with no active use here.
+    """)
 
 # --- Data Table ---
 with st.expander("📋 Show Simulation Data"):
