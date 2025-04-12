@@ -86,6 +86,31 @@ st.line_chart(df[["Relative Earnings (%)", "lsToken Relative Earnings (%)"]])
 st.subheader("📥 lsToken Holdings Over Time")
 st.line_chart(df["lsToken Holdings"])
 
+# --- Explanation ---
+with st.expander("📘 Explanation of Calculation Logic"):
+    st.markdown("""
+    This simulation compares two types of passive token holders:
+
+    #### 1. Passive Self-Voter
+    - Simply holds tokens and receives weekly fees proportional to their share of circulating supply.
+    - Circulating supply increases weekly due to emissions.
+    - Your weekly fee = `your tokens / circulating supply * weekly fees`
+
+    #### 2. Self-Compounding lsToken Holder
+    - Reinvests (compounds) weekly fees into additional token holdings.
+    - Reinvested value increases your share over time, giving higher future earnings.
+    - Each week:
+        - Earn fees based on current lsToken balance
+        - Reinvest those fees to increase lsToken balance
+        - `new balance = old balance + (weekly fees / price)`
+
+    #### Relative Earnings
+    - Relative earnings show % ROI over initial investment.
+    - lsToken holders compound, so their ROI grows faster over time.
+
+    This helps visualize how active fee compounding can outperform passive holding.
+    """)
+
 # --- Data Table ---
 with st.expander("📋 Show Data Table"):
     st.dataframe(df.style.format({
