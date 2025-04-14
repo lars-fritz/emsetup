@@ -24,7 +24,7 @@ decay_rate = 1 - (decay_percent / 100)
 with st.sidebar:
     st.header("Passive User Settings")
     my_tokens = st.number_input("Your Token Holdings (Voting)", value=10_000, format="%d")
-    reference_stake = st.number_input("Reference Stake for Multiplier Comparison", value=5000, step=500)
+    reference_stake = st.number_input("Reference Stake for Multiplier Comparison (used in other pages)", value=5000, step=500)
     st.markdown(f"**Current Value:** ${my_tokens * initial_price:,.2f}")
 
 # --- Emission & Supply Simulation ---
