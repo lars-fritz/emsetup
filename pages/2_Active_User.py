@@ -131,6 +131,9 @@ st.line_chart(df[["Cumulative Volume Rewards", "Baseline Volume Rewards (No Mult
 st.subheader("💸 Relative ROI from Voting Over Time (%)")
 st.line_chart(df["Relative Voting Earnings (%)"])
 
+st.subheader("📈 Voting Weekly Fees and Cumulative Earnings")
+st.line_chart(df[["Voting Weekly Fees", "Cumulative Voting Fees"]])
+
 st.subheader("📈 Voting APR and APY Over Time")
 st.line_chart(df[["Voting APR (%)", "Voting APY (%)"]])
 
@@ -187,4 +190,3 @@ with st.expander("📋 Show Simulation Data"):
         "Volume APR (%)": "%.2f",
         "Volume APY (%)": "%.2f"
     }))
-
