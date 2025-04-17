@@ -55,9 +55,15 @@ voting_weekly_fees = voting_share * weekly_fees
 user_cumulative_fees = np.cumsum(voting_weekly_fees)
 relative_pct = (user_cumulative_fees / (my_tokens * initial_price)) * 100
 
-# --- APR and APY ---
-voting_apr = (voting_weekly_fees * 52) / (voting_tokens * initial_price) * 100
+# --- APR and APY with safeguards ---
+voting_apr = np.where(
+    voting_tokens > 0,
+    (voting_weekly_fees * 52) / (voting_tokens * initial_price) * 100,
+    0
+)
 voting_apy = ((1 + (voting_apr / 100) / 52) ** 52 - 1) * 100
+voting_apr = np.nan_to_num(voting_apr, nan=0.0)
+voting_apy = np.nan_to_num(voting_apy, nan=0.0)
 
 # --- Volume Emissions Inputs ---
 st.subheader("📦 Emissions from Trading Volume (Multiplier Asset)")
@@ -82,9 +88,15 @@ user_share_of_volume = effective_volume / adjusted_total_volume
 user_weekly_rewards = user_share_of_volume * asset_weekly_emissions
 user_cumulative_rewards = np.cumsum(user_weekly_rewards)
 
-# --- APR and APY for volume-based rewards ---
-volume_apr = (user_weekly_rewards * 52) / (multiplier_tokens * initial_price) * 100
+# --- APR and APY for volume-based rewards with safeguards ---
+volume_apr = np.where(
+    multiplier_tokens > 0,
+    (user_weekly_rewards * 52) / (multiplier_tokens * initial_price) * 100,
+    0
+)
 volume_apy = ((1 + (volume_apr / 100) / 52) ** 52 - 1) * 100
+volume_apr = np.nan_to_num(volume_apr, nan=0.0)
+volume_apy = np.nan_to_num(volume_apy, nan=0.0)
 
 # --- No-multiplier baseline (for comparison) ---
 baseline_effective_volume = np.full(weeks, user_volume)
@@ -175,3 +187,4 @@ with st.expander("📋 Show Simulation Data"):
         "Volume APR (%)": "%.2f",
         "Volume APY (%)": "%.2f"
     }))
+
