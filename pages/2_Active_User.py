@@ -55,15 +55,13 @@ voting_weekly_fees = voting_share * weekly_fees
 user_cumulative_fees = np.cumsum(voting_weekly_fees)
 relative_pct = (user_cumulative_fees / (my_tokens * initial_price)) * 100
 
-# --- APR and APY with safeguards ---
+# --- APR with safeguard ---
 voting_apr = np.where(
     voting_tokens > 0,
     (voting_weekly_fees * 52) / (voting_tokens * initial_price) * 100,
     0
 )
-voting_apy = ((1 + (voting_apr / 100) / 52) ** 52 - 1) * 100
 voting_apr = np.nan_to_num(voting_apr, nan=0.0)
-voting_apy = np.nan_to_num(voting_apy, nan=0.0)
 
 # --- Volume Emissions Inputs ---
 st.subheader("📦 Emissions from Trading Volume (Multiplier Asset)")
@@ -88,15 +86,13 @@ user_share_of_volume = effective_volume / adjusted_total_volume
 user_weekly_rewards = user_share_of_volume * asset_weekly_emissions
 user_cumulative_rewards = np.cumsum(user_weekly_rewards)
 
-# --- APR and APY for volume-based rewards with safeguards ---
+# --- APR for volume-based rewards with safeguard ---
 volume_apr = np.where(
     multiplier_tokens > 0,
     (user_weekly_rewards * 52) / (multiplier_tokens * initial_price) * 100,
     0
 )
-volume_apy = ((1 + (volume_apr / 100) / 52) ** 52 - 1) * 100
 volume_apr = np.nan_to_num(volume_apr, nan=0.0)
-volume_apy = np.nan_to_num(volume_apy, nan=0.0)
 
 # --- No-multiplier baseline (for comparison) ---
 baseline_effective_volume = np.full(weeks, user_volume)
@@ -116,13 +112,11 @@ df = pd.DataFrame({
     "Baseline Weekly Rewards (No Multiplier)": baseline_rewards,
     "Multiplier": effective_multiplier,
     "Voting APR (%)": voting_apr,
-    "Voting APY (%)": voting_apy,
-    "Volume APR (%)": volume_apr,
-    "Volume APY (%)": volume_apy
+    "Volume APR (%)": volume_apr
 }).set_index("Week")
 
 # --- Plots ---
-st.subheader("📊 Weekly Volume-Based Rewards")
+st.subheader("📈 Weekly Volume-Based Rewards")
 st.line_chart(df[["Volume Weekly Rewards", "Baseline Weekly Rewards (No Multiplier)"]])
 
 st.subheader("📈 Cumulative Volume-Based Rewards")
@@ -131,14 +125,17 @@ st.line_chart(df[["Cumulative Volume Rewards", "Baseline Volume Rewards (No Mult
 st.subheader("💸 Relative ROI from Voting Over Time (%)")
 st.line_chart(df["Relative Voting Earnings (%)"])
 
-st.subheader("📈 Voting Weekly Fees and Cumulative Earnings")
-st.line_chart(df[["Voting Weekly Fees", "Cumulative Voting Fees"]])
+st.subheader("📈 Voting Weekly Rewards")
+st.line_chart(df["Voting Weekly Fees"])
 
-st.subheader("📈 Voting APR and APY Over Time")
-st.line_chart(df[["Voting APR (%)", "Voting APY (%)"]])
+st.subheader("📈 Cumulative Voting Rewards")
+st.line_chart(df["Cumulative Voting Fees"])
 
-st.subheader("📈 Volume APR and APY Over Time")
-st.line_chart(df[["Volume APR (%)", "Volume APY (%)"]])
+st.subheader("📈 Voting APR Over Time")
+st.line_chart(df["Voting APR (%)"])
+
+st.subheader("📈 Volume APR Over Time")
+st.line_chart(df["Volume APR (%)"])
 
 # --- Explanation ---
 with st.expander("📘 Explanation of Calculation Logic"):
@@ -159,9 +156,8 @@ with st.expander("📘 Explanation of Calculation Logic"):
     - Your **effective volume** is: `user volume * multiplier`
     - Your emissions share = `effective volume / adjusted total volume`, where adjusted volume replaces your own volume with your boosted volume.
 
-    #### APR and APY
+    #### APR
     - APR: Annualized return based on current weekly rewards.
-    - APY: Compounded annual return assuming reinvestment.
     - These are calculated separately for both Voting and Volume-based mechanisms.
 
     #### Comparison with No Multiplier
@@ -186,7 +182,6 @@ with st.expander("📋 Show Simulation Data"):
         "Baseline Weekly Rewards (No Multiplier)": "%.2f",
         "Multiplier": "%.2f",
         "Voting APR (%)": "%.2f",
-        "Voting APY (%)": "%.2f",
-        "Volume APR (%)": "%.2f",
-        "Volume APY (%)": "%.2f"
+        "Volume APR (%)": "%.2f"
     }))
+
