@@ -20,9 +20,9 @@ This simulation distinguishes between:
 defaults = {
     "initial_xtokens": 16_000_000,
     "locked_tokens": 84_000_000,
-    "initial_price": 0.25,
+    "initial_price": 0.45,
     "weekly_fees": 20_000,
-    "base_emission": 800_000,
+    "base_emission": 500_000,
     "decay_percent": 2.0,
     "weeks": 104
 }
