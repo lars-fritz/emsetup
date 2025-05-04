@@ -151,7 +151,7 @@ with st.expander("📘 Explanation of Calculation Logic"):
     - Your weekly trading volume is boosted with a **multiplier** that depends on the tokens you stake for it.
     - **Multiplier Formula**:
         - `effective stake = staked tokens * 1.05^week`
-        - `multiplier = 1 + 3 * (effective stake / (effective stake + reference stake))`
+        - `multiplier = 1 + 10 * (effective stake / (effective stake + reference stake))`
         - This multiplier grows with time and staking.
     - Your **effective volume** is: `user volume * multiplier`
     - Your emissions share = `effective volume / adjusted total volume`, where adjusted volume replaces your own volume with your boosted volume.
