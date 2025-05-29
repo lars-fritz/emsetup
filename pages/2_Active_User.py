@@ -89,7 +89,7 @@ user_cumulative_rewards = np.cumsum(user_weekly_rewards)
 # --- APR for volume-based rewards with safeguard ---
 volume_apr = np.where(
     multiplier_tokens > 0,
-    (user_weekly_rewards * 52) / (multiplier_tokens * initial_price) * 100,
+    (user_weekly_rewards * 52 * initial_price) / (multiplier_tokens) * 100,
     0
 )
 volume_apr = np.nan_to_num(volume_apr, nan=0.0)
