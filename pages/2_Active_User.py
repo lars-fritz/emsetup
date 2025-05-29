@@ -58,7 +58,7 @@ relative_pct = (user_cumulative_fees / (my_tokens * initial_price)) * 100
 # --- APR with safeguard ---
 voting_apr = np.where(
     voting_tokens > 0,
-    (voting_weekly_fees/initial_price * 52) / (voting_tokens * initial_price) * 100,
+    (voting_weekly_fees * 52) / (voting_tokens * initial_price) * 100,
     0
 )
 voting_apr = np.nan_to_num(voting_apr, nan=0.0)
